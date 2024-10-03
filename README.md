@@ -15,25 +15,26 @@ const int buttonPin2 = D5;
 const int buttonPin3 = D6;
 const int buttonPin4 = D7;
 
-const int debounceDelay = 50;  // Délai pour debounce du bouton
-int der_etat_1 = HIGH;
+const int debounceDelay = 50;  // Rebond du bouton
+
+int der_etat_1 = HIGH; // Dernier état du bouton 
 int der_etat_2 = HIGH;
 int der_etat_3 = HIGH;
 int der_etat_4 = HIGH;
-bool etat_act_1 = LOW;
+bool etat_act_1 = LOW; // Initialisation de l'état du bouton 
 bool etat_act_2 = LOW;
 bool etat_act_3 = LOW;
 bool etat_act_4 = LOW;
 
 const int ledPin4 = D8;  // Broche de la LED
-const int ledPin3 = D2;  // Broche de la LED
-const int ledPin2 = D1;  // Broche de la LED
-const int ledPin1 = D0;  // Broche de la LED
+const int ledPin3 = D2;  
+const int ledPin2 = D1;  
+const int ledPin1 = D0;  
 
 void setup() {
   Serial.begin(115200);
 
-  pinMode(buttonPin1, INPUT_PULLUP);  // Configurer les boutons comme entrées avec pullup
+  pinMode(buttonPin1, INPUT_PULLUP);  // Configurer les boutons avec une résistance pullup
   pinMode(buttonPin2, INPUT_PULLUP);
   pinMode(buttonPin3, INPUT_PULLUP);
   pinMode(buttonPin4, INPUT_PULLUP);
@@ -42,13 +43,13 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);  // Éteindre la LED par défaut
 
   pinMode(ledPin1, OUTPUT);  // Configurer la LED comme sortie
-  digitalWrite(ledPin1, LOW);  // LED éteinte par défaut
-  pinMode(ledPin2, OUTPUT);  // Configurer la LED comme sortie
-  digitalWrite(ledPin2, LOW);  // LED éteinte par défaut
-  pinMode(ledPin3, OUTPUT);  // Configurer la LED comme sortie
-  digitalWrite(ledPin3, LOW);  // LED éteinte par défaut
-  pinMode(ledPin4, OUTPUT);  // Configurer la LED comme sortie
-  digitalWrite(ledPin4, LOW);  // LED éteinte par défaut
+  digitalWrite(ledPin1, LOW);  // Led éteinte au démarrage 
+  pinMode(ledPin2, OUTPUT);  
+  digitalWrite(ledPin2, LOW);  
+  pinMode(ledPin3, OUTPUT);  
+  digitalWrite(ledPin3, LOW);  
+  pinMode(ledPin4, OUTPUT);  
+  digitalWrite(ledPin4, LOW); 
 
   // Configurer la carte en mode Access Point
   WiFi.softAP(id, mdp);
@@ -61,32 +62,30 @@ void setup() {
 }
 
 void loop() {
-  // Vérifier si un nouveau client (esclave) veut se connecter
-  recep_esclaves();
+  recep_esclaves();   // Vérifier si un nouveau client (esclave) veut se connecter
 
-  // Vérifier chaque bouton (BP1 à BP4) et envoyer des commandes à tous les esclaves
-  Verif_BP_envoi_infos();
+  Verif_BP_envoi_infos();  // Vérifier chaque bouton (BP1 à BP4) et envoyer des commandes à tous les esclaves
   
-  delay(5);  // Délai très court pour éviter de surcharger le CPU
+  delay(5);  // Délai entre chaque vérification pour pas qu'on ai de conflits si plusieurs appui 
 }
 
-// Fonction pour que les robots puissent atteindre le serveur créé
+// Fonction pour que les robots esclaves puissent atteindre le serveur créé
 void recep_esclaves() {
   WiFiClient nouveau_client = server.available();  // Vérifier si un nouveau client veut se connecter
   if (nouveau_client) {
     Serial.println("Nouveau client en attente de connexion...");
     for (int i = 0; i < maxEsclaves; i++) {
-      // Trouver un slot vide pour le nouveau client
-      if (!esclaves[i] || !esclaves[i].connected()) {
+      
+      if (!esclaves[i] || !esclaves[i].connected()) { // Attibuer à l'esclave un numéro 
         esclaves[i] = nouveau_client;
         Serial.print("Esclave connecté à l'index ");
         Serial.println(i);
         return;
       }
     }
-    // Si tous les slots sont pleins, rejeter le nouveau client
+    // Si tous les appareils sont connectés, rejeter le nouveau client (ici 3 robots max)
     nouveau_client.stop();
-    Serial.println("Client rejeté, tous les slots d'esclaves sont pleins.");
+    Serial.println("Client rejeté, tous robots connectés.");
   }
 }
 
@@ -95,7 +94,7 @@ void Verif_BP_envoi_infos() {
   // Bouton 1
   bool etat_BP1 = digitalRead(buttonPin1);
   if (etat_BP1 != der_etat_1) {
-    delay(debounceDelay);  // Debounce simple
+    delay(debounceDelay);  
     etat_BP1 = digitalRead(buttonPin1);  // Re-lire après le délai
 
     if (etat_BP1 == LOW) {  // Bouton appuyé
@@ -113,7 +112,7 @@ void Verif_BP_envoi_infos() {
   // Bouton 2
   bool etat_BP2 = digitalRead(buttonPin2); 
   if (etat_BP2 != der_etat_2) {
-    delay(debounceDelay);  // Debounce simple
+    delay(debounceDelay);  
     etat_BP2 = digitalRead(buttonPin2);  // Re-lire après le délai
 
     if (etat_BP2 == LOW) {  // Bouton appuyé
@@ -131,7 +130,7 @@ void Verif_BP_envoi_infos() {
   // Bouton 3
   bool etat_BP3 = digitalRead(buttonPin3);
   if (etat_BP3 != der_etat_3) {
-    delay(debounceDelay);  // Debounce simple
+    delay(debounceDelay);  
     etat_BP3 = digitalRead(buttonPin3);  // Re-lire après le délai
 
     if (etat_BP3 == LOW) {  // Bouton appuyé
@@ -149,7 +148,7 @@ void Verif_BP_envoi_infos() {
   // Bouton 4
   bool etat_BP4 = digitalRead(buttonPin2);
   if (etat_BP4 != der_etat_4) {
-    delay(debounceDelay);  // Debounce simple
+    delay(debounceDelay);  
     etat_BP4 = digitalRead(buttonPin4);  // Re-lire après le délai
 
     if (etat_BP4 == LOW) {  // Bouton appuyé
@@ -169,7 +168,7 @@ void Verif_BP_envoi_infos() {
 // Fonction pour envoyer une commande à tous les esclaves connectés
 void envoi_cmd_esclaves(const char* commande) {
   for (int i = 0; i < maxEsclaves; i++) {
-    if (esclaves[i] && esclaves[i].connected()) {
+    if (esclaves[i] && esclaves[i].connected()) { // Vérification que les esclaves sont toujours connectés
       esclaves[i].println(commande);  // Envoyer la commande à l'esclave
       Serial.print("Commande envoyée à l'esclave ");
       Serial.print(i);
