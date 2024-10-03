@@ -1,7 +1,7 @@
 # Code de la carte Maître des 3 robots
 ## Codé sur Wemos R1 D2 embarquant un module ESP8266
 
-'''
+'''c
 #include <ESP8266WiFi.h>
 
 const char *id = "ESPap";  // SSID du point d'accès
